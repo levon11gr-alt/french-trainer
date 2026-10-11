@@ -1,0 +1,1237 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>French Trainer v4.0</title>
+
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#10131c">
+<link rel="icon" href="./icon-192.png">
+
+<style>
+:root {
+  --bg: #10131c;
+  --panel: #1a2030;
+  --panel2: #242c40;
+  --text: #f4f6ff;
+  --muted: #aab3c9;
+  --accent: #8b7cff;
+  --green: #4cda9a;
+  --red: #ff7185;
+  --border: #333d55;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 24px 14px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  max-width: 850px;
+  margin: auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+h1 { margin-bottom: 7px; }
+h2 { margin-top: 0; }
+
+.subtitle, .muted {
+  color: var(--muted);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+button, input, select {
+  font: inherit;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+button {
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  color: var(--text);
+  cursor: pointer;
+  transition: .15s;
+}
+
+button:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+button.primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+button.success {
+  border-color: var(--green);
+}
+
+button.danger {
+  border-color: var(--red);
+}
+
+button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.row > * { flex: 1; }
+
+label {
+  display: block;
+  margin: 14px 0 7px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+input, select {
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+button.full { width: 100%; }
+
+.word {
+  font-size: clamp(30px, 6vw, 48px);
+  font-weight: bold;
+  text-align: center;
+  margin: 26px 0;
+  overflow-wrap: anywhere;
+}
+
+.answers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.answer {
+  min-height: 62px;
+  overflow-wrap: anywhere;
+}
+
+.answer.correct {
+  border-color: var(--green);
+  background: #173c31;
+}
+
+.answer.wrong {
+  border-color: var(--red);
+  background: #43232e;
+}
+
+.progress-track {
+  height: 8px;
+  border-radius: 20px;
+  background: var(--panel2);
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  transition: width .2s;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat {
+  background: var(--panel2);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.stat strong {
+  display: block;
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+.stat span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.word-item, .history-item {
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.word-item:last-child, .history-item:last-child {
+  border-bottom: 0;
+}
+
+.word-item .row { margin-top: 10px; }
+
+.word-item button {
+  flex: 0 0 auto;
+}
+
+.hidden { display: none !important; }
+
+.tag {
+  display: inline-block;
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: var(--panel2);
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.feedback {
+  text-align: center;
+  min-height: 28px;
+  margin: 15px 0;
+}
+
+.good { color: var(--green); }
+.bad { color: var(--red); }
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 20px 0;
+}
+
+.small { font-size: 13px; }
+
+@media (max-width: 520px) {
+  .grid, .answers { grid-template-columns: 1fr; }
+  .card { padding: 17px; }
+  .stat-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .stat { padding: 10px 5px; }
+  .stat strong { font-size: 20px; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+  <h1>🇫🇷 French Trainer</h1>
+  <div class="subtitle">Твой личный тренажёр французского языка</div>
+  <div class="tag">Version 4.0</div>
+</header>
+
+<!-- ГЛАВНОЕ МЕНЮ -->
+<section id="menu" class="card">
+  <h2>Главное меню</h2>
+  <p class="muted">Выбери режим, сложность и язык перевода.</p>
+
+  <label>Режим игры</label>
+  <div class="grid">
+    <button class="primary" onclick="startGame('choice')">
+      🎯 4 варианта ответа
+    </button>
+    <button class="primary" onclick="startGame('typing')">
+      ⌨️ Написать перевод
+    </button>
+  </div>
+
+  <label>Сложность</label>
+  <div class="grid">
+    <button onclick="setDifficulty('easy')" id="diff-easy">
+      🟢 Лёгкий
+    </button>
+    <button onclick="setDifficulty('medium')" id="diff-medium">
+      🟡 Средний
+    </button>
+    <button onclick="setDifficulty('hard')" id="diff-hard">
+      🔴 Сложный
+    </button>
+    <button onclick="setDifficulty('all')" id="diff-all">
+      🎲 Все (рандом)
+    </button>
+  </div>
+
+  <label>Язык перевода</label>
+  <select id="language">
+    <option value="ru">Русский</option>
+    <option value="hy">Հայերեն (армянский)</option>                           
+    
+    </body>
+  </select>
+
+  <p id="difficultyInfo" class="muted small"></p>
+
+  <hr>
+
+  <div class="grid">
+    <button onclick="showPage('dictionary')">📚 Мой словарь</button>
+    <button onclick="showPage('progress')">📊 Мой прогресс</button>
+  </div>
+</section>
+
+<!-- ИГРА -->
+<section id="game" class="card hidden">
+  <div class="row">
+    <div id="gameModeLabel" class="muted"></div>
+    <div id="gameDifficultyLabel" class="muted" style="text-align:right"></div>
+  </div>
+
+  <div class="progress-track">
+    <div id="progressFill" class="progress-fill"></div>
+  </div>
+
+  <div id="questionNumber" class="muted small"></div>
+  <div id="questionWord" class="word"></div>
+
+  <div id="answers" class="answers"></div>
+
+  <div id="typingArea" class="hidden">
+    <input id="typedAnswer" placeholder="Введи перевод..." autocomplete="off">
+    <button class="primary full" style="margin-top:10px" onclick="checkTyped()">
+      Проверить
+    </button>
+  </div>
+
+  <div id="feedback" class="feedback"></div>
+
+  <div class="row">
+    <div>Правильно: <strong id="correctCount">0</strong></div>
+    <div style="text-align:right">Очки: <strong id="scoreCount">0</strong></div>
+  </div>
+
+  <div class="row" style="margin-top:20px">
+    <button onclick="showPage('menu')">В меню</button>
+    <button id="nextButton" class="primary" onclick="nextQuestion()" disabled>
+      Следующее →
+    </button>
+  </div>
+</section>
+
+<!-- РЕЗУЛЬТАТ -->
+<section id="result" class="card hidden">
+  <h2>🏁 Игра завершена!</h2>
+  <div id="resultMessage"></div>
+  <div class="stat-grid" style="margin:20px 0">
+    <div class="stat">
+      <strong id="resultAccuracy">0%</strong>
+      <span>Точность</span>
+    </div>
+    <div class="stat">
+      <strong id="resultCorrect">0/0</strong>
+      <span>Правильных</span>
+    </div>
+    <div class="stat">
+      <strong id="resultScore">0</strong>
+      <span>Очки</span>
+    </div>
+  </div>
+  <button class="primary full" onclick="showPage('menu')">В главное меню</button>
+  <button class="full" style="margin-top:10px" onclick="startGame(gameMode)">Играть ещё раз</button>
+</section>
+
+<!-- МОЙ СЛОВАРЬ -->
+<section id="dictionary" class="card hidden">
+  <h2>📚 Мой словарь</h2>
+  <p class="muted">Добавляй свои слова в одну из трёх папок.</p>
+
+  <div class="grid">
+    <button onclick="selectFolder('easy')">📁 Лёгкий</button>
+    <button onclick="selectFolder('medium')">📁 Средний</button>
+    <button onclick="selectFolder('hard')">📁 Сложный</button>
+    <button onclick="selectFolder('all')">📚 Все слова</button>
+  </div>
+
+  <div id="folderLabel" style="margin-top:18px;font-weight:bold"></div>
+
+  <hr>
+
+  <h3 id="formTitle">Добавить слово</h3>
+
+  <label>Французское слово или фраза</label>
+  <input id="wordFrench" placeholder="Например: Bonjour">
+
+  <label>Перевод на русский</label>
+  <input id="wordRussian" placeholder="Например: Привет">
+
+  <label>Перевод на армянский</label>
+  <input id="wordArmenian" placeholder="Например: Բարև">
+
+  <label>Папка / сложность</label>
+  <select id="wordDifficulty">
+    <option value="easy">Лёгкий</option>
+    <option value="medium">Средний</option>
+    <option value="hard">Сложный</option>
+  </select>
+
+  <div class="row" style="margin-top:14px">
+    <button class="primary" onclick="saveWord()">Сохранить слово</button>
+    <button id="cancelEdit" class="hidden" onclick="cancelEdit()">Отмена</button>
+  </div>
+
+  <p id="dictionaryMessage" class="feedback"></p>
+
+  <hr>
+
+  <div class="row">
+    <h3 style="flex:2">Слова в папке</h3>
+    <div id="wordCount" class="muted" style="text-align:right"></div>
+  </div>
+
+  <div id="wordList"></div>
+
+  <hr>
+  <button onclick="exportWords()">Экспортировать словарь (JSON)</button>
+  <button onclick="showPage('menu')">← В меню</button>
+</section>
+
+<!-- ПРОГРЕСС -->
+<section id="progress" class="card hidden">
+  <h2>📊 Мой прогресс</h2>
+
+  <label>Период статистики</label>
+  <select id="dateFilter" onchange="renderProgress()">
+    <option value="week">Последние 7 дней</option>
+    <option value="month">Последний месяц</option>
+    <option value="quarter">Последние 3 месяца</option>
+    <option value="all">За всё время</option>
+  </select>
+
+  <div class="stat-grid" style="margin:18px 0">
+    <div class="stat">
+      <strong id="totalGames">0</strong>
+      <span>Завершено игр</span>
+    </div>
+    <div class="stat">
+      <strong id="averageAccuracy">0%</strong>
+      <span>Средняя точность</span>
+    </div>
+    <div class="stat">
+      <strong id="totalPoints">0</strong>
+      <span>Всего очков</span>
+    </div>
+  </div>
+
+  <h3>Активность за последние 7 дней</h3>
+  <div id="weeklyChart"></div>
+
+  <hr>
+
+  <h3>История игр</h3>
+  <div id="historyList"></div>
+
+  <hr>
+  <button onclick="exportData()">Скачать резервную копию JSON</button>
+  <button onclick="showPage('menu')">← В меню</button>
+</section>
+
+</div>
+
+<script>
+// =====================================================
+// 1. ВСТРОЕННЫЕ СЛОВА
+// Чтобы добавить слово вручную в код, скопируй одну строку
+// и укажи сложность: easy, medium или hard.
+// =====================================================
+
+const defaultWords = [
+  // ЛЁГКИЕ
+  {fr:"Bonjour",ru:"Привет",hy:"Բարև",difficulty:"easy"},
+  {fr:"Merci",ru:"Спасибо",hy:"Շնորհակալություն",difficulty:"easy"},
+  {fr:"Oui",ru:"Да",hy:"Այո",difficulty:"easy"},
+  {fr:"Non",ru:"Нет",hy:"Ոչ",difficulty:"easy"},
+  {fr:"Maison",ru:"Дом",hy:"Տուն",difficulty:"easy"},
+  {fr:"Chat",ru:"Кот",hy:"Կատու",difficulty:"easy"},
+  {fr:"Chien",ru:"Собака",hy:"Շուն",difficulty:"easy"},
+  {fr:"Eau",ru:"Вода",hy:"Ջուր",difficulty:"easy"},
+  {fr:"Pain",ru:"Хлеб",hy:"Հաց",difficulty:"easy"},
+  {fr:"Livre",ru:"Книга",hy:"Գիրք",difficulty:"easy"},
+  {fr:"École",ru:"Школа",hy:"Դպրոց",difficulty:"easy"},
+  {fr:"Ami",ru:"Друг",hy:"Ընկեր",difficulty:"easy"},
+  {fr:"Famille",ru:"Семья",hy:"Ընտանիք",difficulty:"easy"},
+  {fr:"Jour",ru:"День",hy:"Օր",difficulty:"easy"},
+  {fr:"Nuit",ru:"Ночь",hy:"Գիշեր",difficulty:"easy"},
+  {fr:"Rouge",ru:"Красный",hy:"Կարմիր",difficulty:"easy"},
+  {fr:"Grand",ru:"Большой",hy:"Մեծ",difficulty:"easy"},
+  {fr:"Petit",ru:"Маленький",hy:"Փոքր",difficulty:"easy"},
+  {fr:"Manger",ru:"Есть",hy:"Ուտել",difficulty:"easy"},
+  {fr:"Boire",ru:"Пить",hy:"Խմել",difficulty:"easy"},
+
+  // СРЕДНИЕ
+  {fr:"Voyage",ru:"Путешествие",hy:"Ճանապարհորդություն",difficulty:"medium"},
+  {fr:"Fenêtre",ru:"Окно",hy:"Պատուհան",difficulty:"medium"},
+  {fr:"Réussir",ru:"Добиваться успеха",hy:"Հաջողության հասնել",difficulty:"medium"},
+  {fr:"Choisir",ru:"Выбирать",hy:"Ընտրել",difficulty:"medium"},
+  {fr:"Apprendre",ru:"Учить, изучать",hy:"Սովորել",difficulty:"medium"},
+  {fr:"Comprendre",ru:"Понимать",hy:"Հասկանալ",difficulty:"medium"},
+  {fr:"Oublier",ru:"Забывать",hy:"Մոռանալ",difficulty:"medium"},
+  {fr:"Toujours",ru:"Всегда",hy:"Միշտ",difficulty:"medium"},
+  {fr:"Souvent",ru:"Часто",hy:"Հաճախ",difficulty:"medium"},
+  {fr:"Quelquefois",ru:"Иногда",hy:"Երբեմն",difficulty:"medium"},
+  {fr:"Pourtant",ru:"Тем не менее",hy:"Այնուամենայնիվ",difficulty:"medium"},
+  {fr:"Bientôt",ru:"Скоро",hy:"Շուտով",difficulty:"medium"},
+  {fr:"Peut-être",ru:"Возможно",hy:"Գուցե",difficulty:"medium"},
+  {fr:"Fatigué",ru:"Уставший",hy:"Հոգնած",difficulty:"medium"},
+  {fr:"Courageux",ru:"Смелый",hy:"Քաջ",difficulty:"medium"},
+  {fr:"Environnement",ru:"Окружающая среда",hy:"Շրջակա միջավայր",difficulty:"medium"},
+  {fr:"Améliorer",ru:"Улучшать",hy:"Բարելավել",difficulty:"medium"},
+  {fr:"Raconter",ru:"Рассказывать",hy:"Պատմել",difficulty:"medium"},
+  {fr:"Pourrait",ru:"Мог бы",hy:"Կարող էր",difficulty:"medium"},
+  {fr:"D'habitude",ru:"Обычно",hy:"Սովորաբար",difficulty:"medium"},
+
+  // СЛОЖНЫЕ
+  {fr:"Épanouissement",ru:"Раскрытие потенциала",hy:"Ինքնազարգացում",difficulty:"hard"},
+  {fr:"Persévérance",ru:"Настойчивость",hy:"Համառություն",difficulty:"hard"},
+  {fr:"Néanmoins",ru:"Тем не менее",hy:"Այնուամենայնիվ",difficulty:"hard"},
+  {fr:"Envisager",ru:"Рассматривать возможность",hy:"Դիտարկել հնարավորությունը",difficulty:"hard"},
+  {fr:"Approfondir",ru:"Углублять знания",hy:"Խորացնել գիտելիքները",difficulty:"hard"},
+  {fr:"Émerveillé",ru:"Восхищённый",hy:"Հիացած",difficulty:"hard"},
+  {fr:"Éventuellement",ru:"Возможно, при случае",hy:"Հնարավոր է",difficulty:"hard"},
+  {fr:"Subtil",ru:"Тонкий, едва заметный",hy:"Նուրբ",difficulty:"hard"},
+  {fr:"Épanouir",ru:"Расцветать, развиваться",hy:"Ծաղկել, զարգանալ",difficulty:"hard"},
+  {fr:"Concevoir",ru:"Разрабатывать, задумать",hy:"Մշակել, մտահղանալ",difficulty:"hard"},
+  {fr:"Enjeux",ru:"Ставки, важные вопросы",hy:"Կարևոր խնդիրներ",difficulty:"hard"},
+  {fr:"Toutefois",ru:"Однако",hy:"Այնուամենայնիվ",difficulty:"hard"},
+  {fr:"À l'égard de",ru:"По отношению к",hy:"Ինչ վերաբերում է",difficulty:"hard"},
+  {fr:"Mettre en œuvre",ru:"Осуществлять, реализовывать",hy:"Իրականացնել",difficulty:"hard"},
+  {fr:"Se rendre compte",ru:"Осознавать",hy:"Գիտակցել",difficulty:"hard"},
+  {fr:"Faire preuve de",ru:"Проявлять",hy:"Դրսևորել",difficulty:"hard"},
+  {fr:"Remettre en question",ru:"Ставить под сомнение",hy:"Կասկածի տակ դնել",difficulty:"hard"},
+  {fr:"Épanouissement personnel",ru:"Личностное развитие",hy:"Անձնական զարգացում",difficulty:"hard"},
+  {fr:"Approximativement",ru:"Приблизительно",hy:"Մոտավորապես",difficulty:"hard"},
+  {fr:"Incontournable",ru:"Незаменимый, обязательный",hy:"Անփոխարինելի",difficulty:"hard"}
+];
+
+// =====================================================
+// 2. СОХРАНЕНИЕ ДАННЫХ
+// =====================================================
+
+const WORDS_KEY = "frenchTrainer_customWords_v4";
+const HISTORY_KEY = "frenchTrainer_history_v4";
+
+function loadJSON(key, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+// Переносим пользовательские слова из версии 3, если они есть.
+let customWords = loadJSON(WORDS_KEY, null);
+
+if (!customWords) {
+  customWords = loadJSON("frenchTrainer_customWords_v3", []);
+  customWords = customWords.map(w => ({
+    ...w,
+    difficulty: ["easy","medium","hard"].includes(w.difficulty)
+      ? w.difficulty : "easy"
+  }));
+  localStorage.setItem(WORDS_KEY, JSON.stringify(customWords));
+}
+
+let history = loadJSON(HISTORY_KEY, null);
+
+if (!history) {
+  history = loadJSON("frenchTrainer_history_v3", []);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+}
+
+function saveWords() {
+  localStorage.setItem(WORDS_KEY, JSON.stringify(customWords));
+}
+
+function saveHistory() {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+}
+
+// =====================================================
+// 3. ОБЩИЕ НАСТРОЙКИ
+// =====================================================
+
+const difficultyNames = {
+  easy: "Лёгкий",
+  medium: "Средний",
+  hard: "Сложный",
+  all: "Все (рандом)"
+};
+
+let selectedDifficulty = "easy";
+let selectedFolder = "easy";
+let gameMode = "choice";
+let gameWords = [];
+let questionIndex = 0;
+let correct = 0;
+let score = 0;
+let answered = false;
+let editingId = null;
+let lastGame = null;
+
+function allWords() {
+  // Пользовательские слова имеют приоритет, если совпадают
+  // французское слово и сложность.
+  const merged = [...defaultWords];
+
+  customWords.forEach(custom => {
+    const index = merged.findIndex(w =>
+      w.fr.toLowerCase() === custom.fr.toLowerCase() &&
+      w.difficulty === custom.difficulty
+    );
+
+    if (index >= 0) merged[index] = custom;
+    else merged.push(custom);
+  });
+
+  return merged;
+}
+
+function shuffle(array) {
+  const result = [...array];
+
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+
+  return result;
+}
+
+function setDifficulty(value) {
+  selectedDifficulty = value;
+
+  ["easy","medium","hard","all"].forEach(key => {
+    const button = document.getElementById("diff-" + key);
+    button.classList.toggle("success", key === value);
+  });
+
+  const counts = {
+    easy: allWords().filter(w => w.difficulty === "easy").length,
+    medium: allWords().filter(w => w.difficulty === "medium").length,
+    hard: allWords().filter(w => w.difficulty === "hard").length
+  };
+
+  const count = value === "all"
+    ? counts.easy + counts.medium + counts.hard
+    : counts[value];
+
+  document.getElementById("difficultyInfo").textContent =
+    `Выбрано: ${difficultyNames[value]}. Доступно слов: ${count}.`;
+}
+
+function showPage(page) {
+  ["menu","game","result","dictionary","progress"].forEach(id => {
+    document.getElementById(id).classList.toggle("hidden", id !== page);
+  });
+
+  if (page === "dictionary") renderDictionary();
+  if (page === "progress") renderProgress();
+
+  if (page === "menu") {
+    setDifficulty(selectedDifficulty);
+  }
+}
+
+// =====================================================
+// 4. ИГРА
+// =====================================================
+
+function startGame(mode) {
+  gameMode = mode;
+
+  let pool = allWords();
+
+  if (selectedDifficulty !== "all") {
+    pool = pool.filter(w => w.difficulty === selectedDifficulty);
+  }
+
+  if (pool.length < 4 && mode === "choice") {
+    alert("Для режима с 4 вариантами желательно иметь минимум 4 слова в выбранной сложности.");
+    return;
+  }
+
+  if (pool.length === 0) {
+    alert("В этой папке пока нет слов.");
+    return;
+  }
+
+  // До 10 вопросов за игру. Слова не повторяются в одном раунде.
+  gameWords = shuffle(pool).slice(0, Math.min(10, pool.length));
+  questionIndex = 0;
+  correct = 0;
+  score = 0;
+  answered = false;
+
+  document.getElementById("gameModeLabel").textContent =
+    mode === "choice" ? "🎯 4 варианта ответа" : "⌨️ Ввод перевода";
+
+  document.getElementById("gameDifficultyLabel").textContent =
+    difficultyNames[selectedDifficulty];
+
+  showPage("game");
+  renderQuestion();
+}
+
+function currentWord() {
+  return gameWords[questionIndex];
+}
+
+function currentLanguage() {
+  return document.getElementById("language").value;
+}
+
+function translation(word) {
+  return word[currentLanguage()] || word.ru || "";
+}
+
+function renderQuestion() {
+  const word = currentWord();
+  answered = false;
+
+  document.getElementById("questionNumber").textContent =
+    `Вопрос ${questionIndex + 1} из ${gameWords.length}`;
+
+  document.getElementById("progressFill").style.width =
+    `${questionIndex / gameWords.length * 100}%`;
+
+  document.getElementById("questionWord").textContent = word.fr;
+  document.getElementById("correctCount").textContent = correct;
+  document.getElementById("scoreCount").textContent = score;
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("feedback").className = "feedback";
+  document.getElementById("nextButton").disabled = true;
+
+  const answers = document.getElementById("answers");
+  const typingArea = document.getElementById("typingArea");
+
+  answers.innerHTML = "";
+  typingArea.classList.toggle("hidden", gameMode !== "typing");
+  answers.classList.toggle("hidden", gameMode !== "choice");
+
+  if (gameMode === "choice") {
+    const options = shuffle([
+      word,
+      ...shuffle(allWords().filter(w => w.fr !== word.fr)).slice(0, 3)
+    ]);
+
+    options.forEach(option => {
+      const button = document.createElement("button");
+      button.className = "answer";
+      button.textContent = translation(option);
+      button.onclick = () => checkChoice(button, option);
+      answers.appendChild(button);
+    });
+  } else {
+    const input = document.getElementById("typedAnswer");
+    input.value = "";
+    input.disabled = false;
+    input.focus();
+  }
+}
+
+function normalize(text) {
+  return String(text)
+    .toLocaleLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’']/g, "")
+    .replace(/[.,!?;:]/g, "")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function showFeedback(isCorrect, message) {
+  const feedback = document.getElementById("feedback");
+  feedback.textContent = message;
+  feedback.className = "feedback " + (isCorrect ? "good" : "bad");
+}
+
+function checkChoice(button, option) {
+  if (answered) return;
+
+  answered = true;
+
+  const word = currentWord();
+  const isCorrect = option.fr === word.fr;
+
+  document.querySelectorAll(".answer").forEach(btn => {
+    btn.disabled = true;
+
+    if (btn.textContent === translation(word)) {
+      btn.classList.add("correct");
+    }
+  });
+
+  if (isCorrect) {
+    correct++;
+    score += 10;
+    showFeedback(true, "Правильно! +10 очков");
+  } else {
+    button.classList.add("wrong");
+    showFeedback(false, `Неправильно. Ответ: ${translation(word)}`);
+  }
+
+  finishAnswer();
+}
+
+function checkTyped() {
+  if (answered) return;
+
+  const input = document.getElementById("typedAnswer");
+  const userAnswer = normalize(input.value);
+  const word = currentWord();
+  const correctAnswer = normalize(translation(word));
+
+  if (!userAnswer) {
+    showFeedback(false, "Сначала введи перевод.");
+    return;
+  }
+
+  answered = true;
+  input.disabled = true;
+
+  if (userAnswer === correctAnswer) {
+    correct++;
+    score += 10;
+    showFeedback(true, "Правильно! +10 очков");
+  } else {
+    showFeedback(false, `Правильный ответ: ${translation(word)}`);
+  }
+
+  finishAnswer();
+}
+
+document.getElementById("typedAnswer").addEventListener("keydown", event => {
+  if (event.key === "Enter") checkTyped();
+});
+
+function finishAnswer() {
+  document.getElementById("correctCount").textContent = correct;
+  document.getElementById("scoreCount").textContent = score;
+  document.getElementById("nextButton").disabled = false;
+  document.getElementById("progressFill").style.width =
+    `${(questionIndex + 1) / gameWords.length * 100}%`;
+}
+
+function nextQuestion() {
+  if (!answered) return;
+
+  questionIndex++;
+
+  if (questionIndex >= gameWords.length) {
+    finishGame();
+  } else {
+    renderQuestion();
+  }
+}
+
+function finishGame() {
+  const accuracy = Math.round(correct / gameWords.length * 100);
+
+  lastGame = {
+    date: new Date().toISOString(),
+    mode: gameMode,
+    difficulty: selectedDifficulty,
+    total: gameWords.length,
+    correct,
+    score,
+    accuracy
+  };
+
+  history.push(lastGame);
+  saveHistory();
+
+  document.getElementById("resultAccuracy").textContent = accuracy + "%";
+  document.getElementById("resultCorrect").textContent =
+    `${correct}/${gameWords.length}`;
+  document.getElementById("resultScore").textContent = score;
+
+  document.getElementById("resultMessage").textContent =
+    accuracy === 100 ? "Отлично! Все ответы правильные!" :
+    accuracy >= 70 ? "Хороший результат! Продолжай тренироваться." :
+    "Не сдавайся. Повтори слова и попробуй ещё раз!";
+
+  showPage("result");
+}
+
+// =====================================================
+// 5. МОЙ СЛОВАРЬ — ТРИ ПАПКИ
+// =====================================================
+
+function selectFolder(folder) {
+  selectedFolder = folder;
+
+  if (folder !== "all") {
+    document.getElementById("wordDifficulty").value = folder;
+  }
+
+  renderDictionary();
+}
+
+function saveWord() {
+  const fr = document.getElementById("wordFrench").value.trim();
+  const ru = document.getElementById("wordRussian").value.trim();
+  const hy = document.getElementById("wordArmenian").value.trim();
+  const difficulty = document.getElementById("wordDifficulty").value;
+
+  if (!fr || (!ru && !hy)) {
+    document.getElementById("dictionaryMessage").textContent =
+      "Введи французское слово и хотя бы один перевод.";
+    return;
+  }
+
+  if (editingId === null) {
+    customWords.push({
+      id: Date.now() + Math.random(),
+      fr, ru, hy, difficulty
+    });
+  } else {
+    const index = customWords.findIndex(w => w.id === editingId);
+
+    if (index !== -1) {
+      customWords[index] = {
+        ...customWords[index],
+        fr, ru, hy, difficulty
+      };
+    }
+  }
+
+  saveWords();
+  clearWordForm();
+  selectedFolder = difficulty;
+  renderDictionary();
+
+  document.getElementById("dictionaryMessage").textContent =
+    "Слово сохранено!";
+}
+
+function clearWordForm() {
+  document.getElementById("wordFrench").value = "";
+  document.getElementById("wordRussian").value = "";
+  document.getElementById("wordArmenian").value = "";
+  editingId = null;
+  document.getElementById("formTitle").textContent = "Добавить слово";
+  document.getElementById("cancelEdit").classList.add("hidden");
+}
+
+function cancelEdit() {
+  clearWordForm();
+}
+
+function editWord(id) {
+  const word = customWords.find(w => w.id === id);
+  if (!word) return;
+
+  editingId = id;
+  document.getElementById("wordFrench").value = word.fr;
+  document.getElementById("wordRussian").value = word.ru || "";
+  document.getElementById("wordArmenian").value = word.hy || "";
+  document.getElementById("wordDifficulty").value = word.difficulty || "easy";
+  document.getElementById("formTitle").textContent = "Редактировать слово";
+  document.getElementById("cancelEdit").classList.remove("hidden");
+
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function deleteWord(id) {
+  if (!confirm("Удалить это слово из твоего словаря?")) return;
+
+  customWords = customWords.filter(w => w.id !== id);
+  saveWords();
+  renderDictionary();
+}
+
+function renderDictionary() {
+  const words = allWords();
+
+  const filtered = selectedFolder === "all"
+    ? words
+    : words.filter(w => w.difficulty === selectedFolder);
+
+  document.getElementById("folderLabel").textContent =
+    selectedFolder === "all"
+      ? "📚 Все слова"
+      : "📁 Папка: " + difficultyNames[selectedFolder];
+
+  document.getElementById("wordCount").textContent =
+    `${filtered.length} слов`;
+
+  const list = document.getElementById("wordList");
+  list.innerHTML = "";
+
+  if (!filtered.length) {
+    list.textContent = "В этой папке пока нет слов.";
+    return;
+  }
+
+  filtered.forEach(word => {
+    const item = document.createElement("div");
+    item.className = "word-item";
+
+    const title = document.createElement("strong");
+    title.textContent = word.fr;
+
+    const translations = document.createElement("div");
+    translations.className = "muted";
+    translations.textContent =
+      `🇷🇺 ${word.ru || "—"} · 🇦🇲 ${word.hy || "—"}`;
+
+    const tag = document.createElement("div");
+    tag.className = "tag";
+    tag.textContent = difficultyNames[word.difficulty] || "Лёгкий";
+
+    item.append(title, document.createElement("br"), translations, tag);
+
+    // Встроенные слова можно использовать в игре,
+    // но редактировать и удалять можно только свои.
+    const custom = customWords.find(w =>
+      w.fr === word.fr && w.difficulty === word.difficulty
+    );
+
+    if (custom) {
+      const actions = document.createElement("div");
+      actions.className = "row";
+
+      const edit = document.createElement("button");
+      edit.textContent = "✏️ Редактировать";
+      edit.onclick = () => editWord(custom.id);
+
+      const remove = document.createElement("button");
+      remove.className = "danger";
+      remove.textContent = "🗑 Удалить";
+      remove.onclick = () => deleteWord(custom.id);
+
+      actions.append(edit, remove);
+      item.appendChild(actions);
+    } else {
+      const note = document.createElement("div");
+      note.className = "muted small";
+      note.textContent = "Встроенное слово";
+      item.appendChild(note);
+    }
+
+    list.appendChild(item);
+  });
+}
+
+function downloadJSON(data, filename) {
+  const blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    {type: "application/json"}
+  );
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportWords() {
+  downloadJSON(customWords, "french-trainer-dictionary.json");
+}
+
+function exportData() {
+  downloadJSON({
+    exportedAt: new Date().toISOString(),
+    customWords,
+    history
+  }, "french-trainer-backup.json");
+}
+
+// =====================================================
+// 6. СТАТИСТИКА И ФИЛЬТРЫ ДАТ
+// =====================================================
+
+function renderProgress() {
+  const filter = document.getElementById("dateFilter").value;
+  const now = new Date();
+  let cutoff = null;
+
+  if (filter === "week") {
+    cutoff = new Date(now);
+    cutoff.setDate(now.getDate() - 7);
+  } else if (filter === "month") {
+    cutoff = new Date(now);
+    cutoff.setMonth(now.getMonth() - 1);
+  } else if (filter === "quarter") {
+    cutoff = new Date(now);
+    cutoff.setMonth(now.getMonth() - 3);
+  }
+
+  const games = history.filter(game =>
+    !cutoff || new Date(game.date) >= cutoff
+  );
+
+  const totalGames = games.length;
+  const totalCorrect = games.reduce((sum, g) => sum + Number(g.correct || 0), 0);
+  const totalQuestions = games.reduce((sum, g) => sum + Number(g.total || 0), 0);
+  const totalPointsValue = games.reduce((sum, g) => sum + Number(g.score || 0), 0);
+
+  const average = totalQuestions
+    ? Math.round(totalCorrect / totalQuestions * 100)
+    : 0;
+
+  document.getElementById("totalGames").textContent = totalGames;
+  document.getElementById("averageAccuracy").textContent = average + "%";
+  document.getElementById("totalPoints").textContent = totalPointsValue;
+
+  renderWeeklyChart();
+  renderHistory(games);
+}
+
+function renderWeeklyChart() {
+  const chart = document.getElementById("weeklyChart");
+  chart.innerHTML = "";
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const days = [];
+
+  for (let i = 6; i >= 0; i--) {
+    const day = new Date(today);
+    day.setDate(today.getDate() - i);
+
+    const count = history.filter(game => {
+      const d = new Date(game.date);
+      return d.getFullYear() === day.getFullYear() &&
+        d.getMonth() === day.getMonth() &&
+        d.getDate() === day.getDate();
+    }).length;
+
+    days.push({
+      label: day.toLocaleDateString("ru-RU", {
+        day: "2-digit", month: "2-digit"
+      }),
+      count
+    });
+  }
+
+  const max = Math.max(1, ...days.map(d => d.count));
+
+  days.forEach(day => {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.style.margin = "10px 0";
+
+    const label = document.createElement("div");
+    label.className = "small";
+    label.style.flex = "0 0 55px";
+    label.textContent = day.label;
+
+    const track = document.createElement("div");
+    track.className = "progress-track";
+    track.style.flex = "1";
+    track.style.margin = "0";
+
+    const fill = document.createElement("div");
+    fill.className = "progress-fill";
+    fill.style.width = `${day.count / max * 100}%`;
+
+    track.appendChild(fill);
+
+    const count = document.createElement("div");
+    count.style.flex = "0 0 30px";
+    count.style.textAlign = "right";
+    count.textContent = day.count;
+
+    row.append(label, track, count);
+    chart.appendChild(row);
+  });
+}
+
+function renderHistory(games) {
+  const list = document.getElementById("historyList");
+  list.innerHTML = "";
+
+  if (!games.length) {
+    list.textContent = "За выбранный период завершённых игр нет.";
+    return;
+  }
+
+  [...games].reverse().forEach(game => {
+    const item = document.createElement("div");
+    item.className = "history-item";
+
+    const date = new Date(game.date).toLocaleString("ru-RU");
+    const mode = game.mode === "choice"
+      ? "4 варианта"
+      : "Ввод перевода";
+
+    const difficulty = difficultyNames[game.difficulty] || "Лёгкий";
+
+    const title = document.createElement("strong");
+    title.textContent = date;
+
+    const details = document.createElement("div");
+    details.className = "muted small";
+    details.textContent =
+      `${mode} · ${difficulty} · ${game.correct}/${game.total} правильных · ${game.accuracy}% · ${game.score} очков`;
+
+    item.append(title, details);
+    list.appendChild(item);
+  });
+}
+
+// =====================================================
+// 7. ЗАПУСК
+// =====================================================
+
+setDifficulty("easy");
+selectFolder("easy");
+showPage("menu");
+</script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js")
+        .catch(error => console.error("Ошибка Service Worker:", error));
+    });
+  }
+</script>
+
+</body>
+</html>
+
